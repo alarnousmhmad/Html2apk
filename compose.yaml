@@ -1,0 +1,24 @@
+services:
+  html2apk:
+    build: .
+    container_name: html2apk-cloud
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      DATA_DIR: "/app/data"
+      MAX_CONCURRENT_BUILDS: "1"
+    volumes:
+      - html2apk_data:/app/data
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 512
+    mem_limit: 5g
+    cpus: 3.0
+
+volumes:
+  html2apk_data:

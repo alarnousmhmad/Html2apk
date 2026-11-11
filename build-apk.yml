@@ -1,0 +1,109 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: 'اسم التطبيق الظاهر على الهاتف'
+        required: true
+        default: 'My HTML App'
+        type: string
+      package_id:
+        description: 'معرّف التطبيق مثل com.example.myapp'
+        required: true
+        default: 'com.example.myhtmlapp'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check website ZIP
+        shell: bash
+        run: |
+          test -f input/website.zip || {
+            echo 'لم يتم العثور على input/website.zip. ارفع ملف موقعك المضغوط بهذا الاسم داخل مجلد input.'
+            exit 1
+          }
+          unzip -t input/website.zip
+
+      - name: Build HTML2APK service image
+        run: docker compose build
+
+      - name: Start temporary builder
+        run: docker compose up -d
+
+      - name: Wait for builder API
+        shell: bash
+        run: |
+          for i in $(seq 1 60); do
+            if curl --silent --fail http://localhost:8080/api/health >/dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+          docker compose logs
+          exit 1
+
+      - name: Submit APK build
+        id: submit
+        env:
+          APP_NAME: ${{ inputs.app_name }}
+          PACKAGE_ID: ${{ inputs.package_id }}
+        shell: bash
+        run: |
+          response=$(curl --silent --show-error --fail \
+            -F "website=@input/website.zip;type=application/zip" \
+            -F "appName=$APP_NAME" \
+            -F "packageId=$PACKAGE_ID" \
+            http://localhost:8080/api/build)
+          echo "$response"
+          job_id=$(echo "$response" | jq -r '.id // empty')
+          test -n "$job_id"
+          echo "job_id=$job_id" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for APK
+        env:
+          JOB_ID: ${{ steps.submit.outputs.job_id }}
+        shell: bash
+        run: |
+          mkdir -p output
+          for i in $(seq 1 90); do
+            response=$(curl --silent --show-error "http://localhost:8080/api/jobs/$JOB_ID")
+            status=$(echo "$response" | jq -r '.status // "unknown"')
+            stage=$(echo "$response" | jq -r '.stage // ""')
+            echo "[$i/90] $status - $stage"
+            if [ "$status" = "completed" ]; then
+              curl --silent --show-error --fail \
+                "http://localhost:8080/api/jobs/$JOB_ID/download" \
+                --output output/application.apk
+              test -s output/application.apk
+              exit 0
+            fi
+            if [ "$status" = "failed" ]; then
+              echo "$response" | jq .
+              exit 1
+            fi
+            sleep 30
+          done
+          echo 'انتهت مهلة انتظار بناء APK.'
+          exit 1
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: output/application.apk
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Show builder logs
+        if: always()
+        run: docker compose logs --no-color || true

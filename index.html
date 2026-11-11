@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="حوّل مواقع HTML إلى تطبيقات Android بصيغة APK عبر البناء السحابي.">
+  <title>HTML2APK Cloud — تحويل HTML إلى APK</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="HTML2APK Cloud">
+      <span class="brand-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4 2.5 12 7 20M17 4l4.5 8-4.5 8M14 3l-4 18"/></svg></span>
+      <span>HTML2APK<span class="brand-muted"> CLOUD</span></span>
+    </a>
+    <div class="top-status"><span class="pulse"></span> محرك البناء السحابي</div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow"><span class="eyebrow-line"></span> ANDROID BUILD PLATFORM</div>
+      <h1>من موقعك إلى تطبيقك.<br><span>بخطوة واحدة.</span></h1>
+      <p class="hero-copy">ارفع ملفات HTML أو مشروعك الكامل، اضبط إعدادات التطبيق، واترك محرك البناء السحابي يتولى الباقي.</p>
+    </section>
+
+    <section class="workspace">
+      <div class="section-heading">
+        <div><span class="step-label">01 / SOURCE</span><h2>ملفات المشروع</h2></div>
+        <span class="format-pill">HTML · ZIP</span>
+      </div>
+      <form id="buildForm">
+        <label class="dropzone" id="dropzone" for="website">
+          <input id="website" name="website" type="file" accept=".html,.htm,.zip, text/html,application/zip" required>
+          <span class="upload-icon"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg></span>
+          <strong id="fileTitle">اسحب ملفك إلى هنا أو <span>تصفّح الملفات</span></strong>
+          <small id="fileHint">ملف HTML واحد أو ZIP يحتوي على index.html وبقية ملفات الموقع</small>
+          <span class="file-chip" id="fileChip" hidden></span>
+        </label>
+
+        <div class="section-heading settings-heading">
+          <div><span class="step-label">02 / CONFIGURATION</span><h2>إعدادات التطبيق</h2></div>
+        </div>
+        <div class="fields">
+          <label class="field"><span>اسم التطبيق</span><input id="appName" name="appName" maxlength="40" value="My Android App" required placeholder="مثال: تطبيقي"></label>
+          <label class="field"><span>معرّف الحزمة <small>Package ID</small></span><input id="packageId" name="packageId" maxlength="180" value="com.example.myapp" required dir="ltr" spellcheck="false" placeholder="com.example.myapp"></label>
+        </div>
+        <div class="build-note">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>
+          <p>سيتم إنشاء APK تجريبي موقّع بمفتاح Debug. الحد الأقصى للملف 25MB، وللمحتوى بعد فك ZIP هو 60MB.</p>
+        </div>
+        <button class="primary-button" id="buildButton" type="submit">
+          <span>ابدأ بناء التطبيق</span>
+          <svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+      </form>
+    </section>
+
+    <section class="result-panel" id="resultPanel" hidden aria-live="polite">
+      <div class="result-head"><div><span class="step-label">03 / BUILD PROCESS</span><h2>حالة عملية البناء</h2></div><span class="status-badge" id="statusBadge">قيد الانتظار</span></div>
+      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="stage-row"><span id="stageText">في قائمة الانتظار</span><span id="jobId"></span></div>
+      <div class="log-box" id="logBox" dir="ltr"></div>
+      <div class="error-box" id="errorBox" hidden></div>
+      <a class="download-button" id="downloadButton" href="#" hidden download>
+        <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 17v3h16v-3"/></svg>
+        تنزيل ملف APK
+      </a>
+      <button class="secondary-button" id="newBuildButton" type="button">إنشاء تطبيق آخر</button>
+    </section>
+
+    <section class="feature-grid">
+      <article class="feature"><span class="feature-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 9h16M8 5v4"/></svg></span><h3>مشروعك كما هو</h3><p>يدعم HTML وCSS وJavaScript والصور والملفات المحلية داخل ZIP.</p></article>
+      <article class="feature"><span class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7zM9 12l2 2 4-4"/></svg></span><h3>بناء معزول</h3><p>كل عملية بناء تتم في مساحة عمل منفصلة وتُحذف ملفاتها المؤقتة بعدها.</p></article>
+      <article class="feature"><span class="feature-icon"><svg viewBox="0 0 24 24"><path d="M4 17 10 11l4 4 6-8M15 7h5v5"/></svg></span><h3>متابعة مباشرة</h3><p>راقب مراحل البناء وسجل Gradle حتى يصبح ملف APK جاهزاً.</p></article>
+    </section>
+    <footer>HTML2APK CLOUD <span>·</span> BUILD YOUR ANDROID APP</footer>
+  </main>
+  <script src="/app.js" defer></script>
+</body>
+</html>
